@@ -1,0 +1,1099 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Photo Sorter</title>
+    <style>
+        :root {
+            --bg: #faf7f3;
+            --card: #ffffff;
+            --ink: #2b2522;
+            --muted: #7a6f68;
+            --line: #e7dfd7;
+            --accent: #8a5a44;
+            --accent-dark: #6f4634;
+            --accent-soft: #f4ebe5;
+            --ok: #3f7d58;
+            --ok-soft: #e7f2ea;
+            --warn: #a85d1a;
+            --warn-soft: #fbf0e4;
+            --bad: #a33a3a;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font: 15px/1.5 "Segoe UI", system-ui, -apple-system, sans-serif;
+        }
+
+        header {
+            padding: 28px 20px 8px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header h1 {
+            margin: 0;
+            font: 600 28px/1.2 Georgia, "Times New Roman", serif;
+            letter-spacing: .2px;
+        }
+
+        header p {
+            margin: 6px 0 0;
+            color: var(--muted);
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 12px 20px 60px;
+        }
+
+        .banner {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin: 12px 0;
+        }
+
+        .banner.info {
+            background: var(--accent-soft);
+        }
+
+        .banner.warn {
+            background: var(--warn-soft);
+            color: var(--warn);
+        }
+
+        .banner.bad {
+            background: #f8e5e5;
+            color: var(--bad);
+        }
+
+        .banner.ok {
+            background: var(--ok-soft);
+            color: var(--ok);
+        }
+
+        section.step {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 20px;
+            margin: 16px 0;
+        }
+
+        section.step.locked {
+            opacity: .5;
+            pointer-events: none;
+        }
+
+        .step h2 {
+            margin: 0 0 4px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .num {
+            display: inline-grid;
+            place-items: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            font-size: 14px;
+            flex: none;
+        }
+
+        .hint {
+            color: var(--muted);
+            margin: 0 0 14px;
+            font-size: 14px;
+        }
+
+        button {
+            font: inherit;
+            cursor: pointer;
+            border-radius: 8px;
+            padding: 8px 14px;
+            border: 1px solid var(--line);
+            background: #fff;
+            color: var(--ink);
+        }
+
+        button:hover {
+            border-color: var(--accent);
+        }
+
+        button.primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        button.primary:hover {
+            background: var(--accent-dark);
+        }
+
+        button:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+        }
+
+        button.small {
+            padding: 4px 10px;
+            font-size: 13px;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        input[type=text] {
+            font: inherit;
+            padding: 7px 10px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            min-width: 0;
+        }
+
+        .people {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            margin-top: 12px;
+        }
+
+        .person {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .person .top {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .person .top input {
+            flex: 1;
+        }
+
+        .faces {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 10px 0;
+            min-height: 10px;
+        }
+
+        .chip {
+            position: relative;
+        }
+
+        .chip img {
+            width: 56px;
+            height: 56px;
+            object-fit: cover;
+            border-radius: 8px;
+            display: block;
+        }
+
+        .chip button {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            border-radius: 50%;
+            font-size: 12px;
+            line-height: 1;
+            background: #fff;
+        }
+
+        .groups {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .tag {
+            background: var(--accent-soft);
+            border-radius: 999px;
+            padding: 4px 6px 4px 12px;
+            display: inline-flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .tag button {
+            padding: 0 7px;
+            border: 0;
+            background: transparent;
+        }
+
+        .checks {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 8px 0;
+        }
+
+        .bar {
+            height: 10px;
+            background: var(--accent-soft);
+            border-radius: 999px;
+            overflow: hidden;
+            margin: 12px 0 6px;
+        }
+
+        .bar>div {
+            height: 100%;
+            width: 0;
+            background: var(--accent);
+            transition: width .2s;
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 12px 0;
+        }
+
+        .tabs button.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .grid {
+            display: grid;
+            gap: 8px;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        }
+
+        .thumb {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 3px solid var(--ok);
+            cursor: pointer;
+            background: #eee;
+            aspect-ratio: 1;
+        }
+
+        .thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .thumb.off {
+            border-color: transparent;
+        }
+
+        .thumb.off img {
+            opacity: .3;
+            filter: grayscale(1);
+        }
+
+        .thumb .mark {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--ok);
+            color: #fff;
+            display: grid;
+            place-items: center;
+            font-size: 13px;
+        }
+
+        .thumb.off .mark {
+            background: #fff;
+            color: var(--muted);
+            border: 1px solid var(--line);
+        }
+
+        .thumb .zoom {
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+            padding: 2px 8px;
+            font-size: 12px;
+            background: rgba(255, 255, 255, .92);
+        }
+
+        .slider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 6px 0 4px;
+        }
+
+        .slider input {
+            width: 240px;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(30, 22, 18, .6);
+            display: none;
+            place-items: center;
+            z-index: 10;
+            padding: 20px;
+        }
+
+        .modal.open {
+            display: grid;
+        }
+
+        .modal .box {
+            background: #fff;
+            border-radius: 14px;
+            padding: 20px;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow: auto;
+        }
+
+        .modal .pick {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 12px 0;
+        }
+
+        .modal .pick img {
+            width: 110px;
+            height: 110px;
+            object-fit: cover;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 3px solid transparent;
+        }
+
+        .modal .pick img:hover {
+            border-color: var(--accent);
+        }
+
+        .modal .big {
+            max-width: 100%;
+            max-height: 75vh;
+            display: block;
+            margin: 0 auto 10px;
+            border-radius: 8px;
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--ink);
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 10px;
+            opacity: 0;
+            transition: opacity .3s;
+            pointer-events: none;
+            z-index: 20;
+            max-width: 90vw;
+        }
+
+        #toast.show {
+            opacity: 1;
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+
+        .list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .src {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 8px 12px;
+        }
+
+        .src .name {
+            font-weight: 600;
+        }
+
+        .src .grow {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .src .state {
+            font-size: 13px;
+        }
+
+        .folders {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            margin-top: 12px;
+        }
+
+        .folder {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .folder .top {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .folder .top input {
+            flex: 1;
+        }
+
+        .folder .who {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 14px;
+            margin: 10px 0 6px;
+        }
+
+        .folder .mode {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
+        .folder .warn {
+            color: var(--warn);
+            font-size: 13px;
+        }
+
+        .lbl {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 8px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/dist/face-api.js"></script>
+</head>
+
+<body>
+    <header>
+        <h1>Photo Sorter</h1>
+        <p>Find the people you choose in your photos and copy their pictures into their own folders. Everything stays on
+            your computer.</p>
+    </header>
+
+    <main>
+        <div id="status" class="banner info">Loading face recognition, this takes a few seconds the first time...</div>
+
+        <section class="step locked" id="step1">
+            <h2><span class="num">1</span> Choose the folders to scan</h2>
+            <p class="hint">Add every folder you want searched (for example all 4 wedding folders on your external
+                drive). They are scanned one after the other. Subfolders are included. Your original photos are never
+                changed or moved.</p>
+            <button class="primary" id="addSource">+ Add a folder to scan</button>
+            <div class="list" id="sources"></div>
+            <p id="sourceTotal" class="muted" style="margin:10px 0 0"></p>
+        </section>
+
+        <section class="step locked" id="step2">
+            <h2><span class="num">2</span> Add the people you want</h2>
+            <p class="hint">For each person, add 3 to 5 photos where their face is clear, ideally from different angles.
+                If a photo has more than one face, you'll be asked to click the right one.</p>
+            <button id="addPerson">+ Add a person</button>
+            <div class="people" id="people"></div>
+        </section>
+
+        <section class="step locked" id="step3">
+            <h2><span class="num">3</span> Set up your folders</h2>
+            <p class="hint">Each person gets their own folder automatically. You can rename or remove those, and add as
+                many extra folders as you like, each with the people you choose. You can change this at any time, even
+                after scanning.</p>
+            <button id="addFolder">+ Add a folder</button>
+            <div class="folders" id="folders"></div>
+        </section>
+
+        <section class="step locked" id="step4">
+            <h2><span class="num">4</span> Scan all photos</h2>
+            <p class="hint">This looks for faces in every photo in every folder from step 1, one folder after the other.
+                For a few thousand photos it can take 15 to 30 minutes. Keep this tab open. You can add or change people
+                and folders afterwards without scanning again.</p>
+            <div class="row">
+                <button class="primary" id="startScan">Start scan</button>
+                <button id="stopScan" style="display:none">Stop</button>
+                <span id="scanInfo" class="muted"></span>
+            </div>
+            <div class="bar">
+                <div id="scanBar"></div>
+            </div>
+        </section>
+
+        <section class="step locked" id="step5">
+            <h2><span class="num">5</span> Review the matches</h2>
+            <p class="hint">Green photos will be copied. Click a photo to remove it (or add it back). Use "View" to see
+                it bigger.</p>
+            <div class="slider">
+                <label for="strict"><strong>Matching strictness</strong></label>
+                <span class="muted">Looser</span>
+                <input type="range" id="strict" min="0" max="20" value="9">
+                <span class="muted">Stricter</span>
+            </div>
+            <p class="hint" style="margin-top:0">Looser finds more photos but makes more mistakes. Stricter makes fewer
+                mistakes but may miss some photos.</p>
+            <div class="tabs" id="tabs"></div>
+            <div class="row" style="margin-bottom:10px">
+                <button class="small" id="allOn">Select all</button>
+                <button class="small" id="allOff">Unselect all</button>
+                <span id="tabInfo" class="muted"></span>
+            </div>
+            <div class="grid" id="grid"></div>
+        </section>
+
+        <section class="step locked" id="step6">
+            <h2><span class="num">6</span> Save the folders</h2>
+            <p class="hint">Choose where to save. A folder called "Sorted by person" will be created there, with all
+                your folders from step 3 inside it. Photos are copied, not moved.</p>
+            <div class="row">
+                <button class="primary" id="save">Choose location and save</button>
+                <span id="saveInfo" class="muted"></span>
+            </div>
+            <div class="bar">
+                <div id="saveBar"></div>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal" id="modal">
+        <div class="box" id="modalBox"></div>
+    </div>
+    <div id="toast"></div>
+
+    <script>
+        (() => {
+            const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/model';
+            const IMG_EXT = /\.(jpe?g|png|webp|bmp|gif)$/i;
+            const SKIP_EXT = /\.(heic|heif|cr2|cr3|nef|arw|dng|raf|orf|rw2|raw)$/i;
+            const MAX_SIDE = 1600;
+
+            const state = {
+                sources: [],      // {id, dir, name, count, skipped}
+                files: [],        // {id, sourceId, handle, name, path}
+                people: [],       // {id, name, refs:[{desc, crop}]}
+                folders: [],      // {id, name, members:[personId], mode:'any'|'all', autoFor, renamed}
+                scan: new Map(),  // fileId -> {thumb, faces:[desc]}
+                failed: new Set(),
+                scanning: false, stop: false,
+                excluded: new Map(), activeTab: null, matches: null
+            };
+            let uid = 0;
+
+            const $ = id => document.getElementById(id);
+            const esc = s => String(s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+            const unlock = id => $(id).classList.remove('locked');
+            const lock = id => $(id).classList.add('locked');
+            let toastTimer;
+            function toast(msg) {
+                const t = $('toast'); t.textContent = msg; t.classList.add('show');
+                clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+            }
+            function setStatus(msg, kind = 'info') {const s = $('status'); s.className = 'banner ' + kind; s.textContent = msg; s.style.display = msg ? '' : 'none';}
+            function fmtTime(sec) {
+                if (!isFinite(sec)) return '';
+                const m = Math.floor(sec / 60), s = Math.round(sec % 60);
+                return m > 0 ? `${m} min ${s} sec` : `${s} sec`;
+            }
+            const personName = id => state.people.find(p => p.id === id)?.name || '?';
+
+            // ---------- Startup ----------
+            async function init() {
+                if (!window.showDirectoryPicker) {
+                    setStatus('This app needs Google Chrome or Microsoft Edge on a computer. Please open this file in one of those browsers.', 'bad');
+                    return;
+                }
+                if (typeof faceapi === 'undefined') {
+                    setStatus('Could not load the face recognition library. Check your internet connection and refresh the page.', 'bad');
+                    return;
+                }
+                try {
+                    try {await faceapi.tf.setBackend('webgl');} catch (e) { }
+                    await faceapi.tf.ready();
+                    await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
+                    await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+                    await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+                } catch (e) {
+                    console.error(e);
+                    setStatus('Could not load the face recognition models. Check your internet connection and refresh the page.', 'bad');
+                    return;
+                }
+                setStatus('Ready. Start with step 1.', 'ok');
+                unlock('step1');
+            }
+
+            // ---------- Image helpers ----------
+            async function loadCanvas(file, maxSide = MAX_SIDE) {
+                const bmp = await createImageBitmap(file);
+                const s = Math.min(1, maxSide / Math.max(bmp.width, bmp.height));
+                const c = document.createElement('canvas');
+                c.width = Math.max(1, Math.round(bmp.width * s));
+                c.height = Math.max(1, Math.round(bmp.height * s));
+                c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+                bmp.close && bmp.close();
+                return c;
+            }
+            function thumbBlobUrl(canvas, size = 260) {
+                const s = Math.min(1, size / Math.max(canvas.width, canvas.height));
+                const c = document.createElement('canvas');
+                c.width = Math.round(canvas.width * s); c.height = Math.round(canvas.height * s);
+                c.getContext('2d').drawImage(canvas, 0, 0, c.width, c.height);
+                return new Promise(res => c.toBlob(b => res(URL.createObjectURL(b)), 'image/jpeg', 0.75));
+            }
+            function faceCrop(canvas, box, size = 120) {
+                const pad = Math.max(box.width, box.height) * 0.35;
+                const side = Math.max(box.width, box.height) + pad * 2;
+                const x = box.x + box.width / 2 - side / 2, y = box.y + box.height / 2 - side / 2;
+                const c = document.createElement('canvas'); c.width = size; c.height = size;
+                const ctx = c.getContext('2d'); ctx.fillStyle = '#ddd'; ctx.fillRect(0, 0, size, size);
+                ctx.drawImage(canvas, x, y, side, side, 0, 0, size, size);
+                return c.toDataURL('image/jpeg', 0.85);
+            }
+            async function detect(canvas) {
+                const opts = new faceapi.SsdMobilenetv1Options({minConfidence: 0.5, maxResults: 60});
+                return faceapi.detectAllFaces(canvas, opts).withFaceLandmarks().withFaceDescriptors();
+            }
+            function dist(a, b) {
+                let s = 0;
+                for (let i = 0; i < a.length; i++) {const d = a[i] - b[i]; s += d * d;}
+                return Math.sqrt(s);
+            }
+
+            // ---------- Step 1: folders to scan ----------
+            async function walk(dir, prefix, out, src) {
+                for await (const [name, handle] of dir.entries()) {
+                    if (name.startsWith('.')) continue;
+                    if (handle.kind === 'directory') {
+                        if (name === 'Sorted by person') continue;
+                        await walk(handle, prefix + name + '/', out, src);
+                    } else if (IMG_EXT.test(name)) {
+                        out.push({id: ++uid, sourceId: src.id, handle, name, path: prefix + name});
+                    } else if (SKIP_EXT.test(name)) {
+                        src.skipped++;
+                    }
+                }
+            }
+            $('addSource').onclick = async () => {
+                let dir;
+                try {dir = await window.showDirectoryPicker({mode: 'read'});} catch (e) {return;}
+                for (const s of state.sources) {
+                    try {if (await s.dir.isSameEntry(dir)) {toast(`"${dir.name}" is already in the list.`); return;} } catch (e) { }
+                }
+                const src = {id: ++uid, dir, name: dir.name, count: 0, skipped: 0, loading: true};
+                state.sources.push(src); renderSources();
+                const files = [];
+                try {await walk(dir, dir.name + '/', files, src);}
+                catch (e) {console.error(e); toast(`Could not read "${dir.name}".`); state.sources = state.sources.filter(s => s !== src); renderSources(); return;}
+                files.sort((a, b) => a.path.localeCompare(b.path, undefined, {numeric: true}));
+                src.count = files.length; src.loading = false;
+                state.files.push(...files);
+                renderSources(); afterSourcesChanged();
+            };
+            $('sources').onclick = e => {
+                const id = +e.target.dataset.delsrc; if (!id) return;
+                if (state.scanning) {toast('Stop the scan before removing a folder.'); return;}
+                const gone = new Set(state.files.filter(f => f.sourceId === id).map(f => f.id));
+                state.files = state.files.filter(f => f.sourceId !== id);
+                gone.forEach(fid => {const s = state.scan.get(fid); if (s) URL.revokeObjectURL(s.thumb); state.scan.delete(fid); state.failed.delete(fid);});
+                state.sources = state.sources.filter(s => s.id !== id);
+                renderSources(); afterSourcesChanged();
+            };
+            function sourceScanned(src) {
+                return state.files.filter(f => f.sourceId === src.id && (state.scan.has(f.id) || state.failed.has(f.id))).length;
+            }
+            function renderSources() {
+                $('sources').innerHTML = state.sources.map((s, i) => {
+                    let st;
+                    if (s.loading) st = 'Looking for photos...';
+                    else {
+                        const done = sourceScanned(s);
+                        st = `${s.count.toLocaleString()} photos` + (s.skipped ? `, ${s.skipped} skipped (HEIC or RAW)` : '') +
+                            (done >= s.count && s.count ? ' · scanned ✓' : done ? ` · ${done.toLocaleString()} scanned` : '');
+                    }
+                    return `<div class="src"><span class="num">${i + 1}</span><div class="grow"><div class="name">${esc(s.name)}</div>
+        <div class="state muted">${st}</div></div><button class="small" data-delsrc="${s.id}">Remove</button></div>`;
+                }).join('');
+                const total = state.files.length;
+                $('sourceTotal').textContent = state.sources.length > 1 ? `${total.toLocaleString()} photos in total across ${state.sources.length} folders.` : '';
+            }
+            function afterSourcesChanged() {
+                if (state.files.length) {unlock('step2'); unlock('step3');}
+                refreshScanState();
+                if (state.matches) recompute();
+            }
+
+            // ---------- Step 2: people ----------
+            $('addPerson').onclick = () => {
+                const p = {id: 'p' + (++uid), name: `Person ${state.people.length + 1}`, refs: []};
+                state.people.push(p);
+                state.folders.push({id: 'f' + (++uid), name: p.name, members: [p.id], mode: 'any', autoFor: p.id, renamed: false});
+                renderPeople(); renderFolders(); onPeopleChanged();
+                setTimeout(() => {const el = document.querySelector(`[data-name="${p.id}"]`); el && el.select();}, 0);
+            };
+
+            function renderPeople() {
+                $('people').innerHTML = state.people.map(p => `
+      <div class="person">
+        <div class="top">
+          <input type="text" value="${esc(p.name)}" data-name="${p.id}" aria-label="Name">
+          <button class="small" data-del="${p.id}" title="Remove person">Remove</button>
+        </div>
+        <div class="faces">${p.refs.map((r, i) => `<div class="chip"><img src="${r.crop}" alt=""><button data-delref="${p.id}:${i}" title="Remove">×</button></div>`).join('') || '<span class="muted" style="font-size:13px">No photos yet</span>'}</div>
+        <button class="small primary" data-add="${p.id}">Add photos of ${esc(p.name)}</button>
+        <input type="file" accept="image/*" multiple hidden data-file="${p.id}">
+      </div>`).join('');
+            }
+
+            $('people').addEventListener('input', e => {
+                const id = e.target.dataset.name; if (!id) return;
+                const p = state.people.find(x => x.id === id); p.name = e.target.value.trim() || 'Unnamed';
+                const btn = document.querySelector(`[data-add="${id}"]`); if (btn) btn.textContent = 'Add photos of ' + p.name;
+                state.folders.forEach(f => {if (f.autoFor === id && !f.renamed) f.name = p.name;});
+                renderFolders(); if (state.matches) renderTabs();
+            });
+            $('people').addEventListener('click', e => {
+                const t = e.target;
+                if (t.dataset.del) {
+                    const id = t.dataset.del;
+                    state.people = state.people.filter(p => p.id !== id);
+                    state.folders = state.folders.filter(f => f.autoFor !== id);
+                    state.folders.forEach(f => f.members = f.members.filter(m => m !== id));
+                    renderPeople(); renderFolders(); onPeopleChanged();
+                } else if (t.dataset.delref) {
+                    const [id, i] = t.dataset.delref.split(':');
+                    state.people.find(x => x.id === id).refs.splice(+i, 1);
+                    renderPeople(); onPeopleChanged();
+                } else if (t.dataset.add) {
+                    document.querySelector(`[data-file="${t.dataset.add}"]`).click();
+                }
+            });
+            $('people').addEventListener('change', async e => {
+                const id = e.target.dataset.file; if (!id) return;
+                const p = state.people.find(x => x.id === id);
+                const files = [...e.target.files]; e.target.value = '';
+                for (const f of files) {
+                    setStatus(`Finding faces in ${f.name}...`, 'info');
+                    try {
+                        const canvas = await loadCanvas(f);
+                        const dets = await detect(canvas);
+                        if (!dets.length) {toast(`No face found in ${f.name}. Try a clearer photo.`); continue;}
+                        dets.sort((a, b) => b.detection.box.area - a.detection.box.area);
+                        let chosen = dets[0];
+                        if (dets.length > 1) chosen = await chooseFace(canvas, dets, p.name);
+                        if (!chosen) continue;
+                        p.refs.push({desc: chosen.descriptor, crop: faceCrop(canvas, chosen.detection.box)});
+                        renderPeople(); onPeopleChanged();
+                    } catch (err) {console.error(err); toast(`Couldn't read ${f.name}.`);}
+                }
+                setStatus('', 'info');
+            });
+
+            function chooseFace(canvas, dets, name) {
+                return new Promise(resolve => {
+                    const box = $('modalBox');
+                    box.innerHTML = `<h3 style="margin:0">Which one is ${esc(name)}?</h3>
+        <p class="muted" style="margin:4px 0 0">This photo has ${dets.length} faces. Click the right one.</p>
+        <div class="pick">${dets.map((d, i) => `<img src="${faceCrop(canvas, d.detection.box, 160)}" data-i="${i}" alt="Face ${i + 1}">`).join('')}</div>
+        <button id="skipFace">Skip this photo</button>`;
+                    $('modal').classList.add('open');
+                    const done = v => {$('modal').classList.remove('open'); box.onclick = null; resolve(v);};
+                    box.onclick = e => {
+                        if (e.target.dataset.i !== undefined) done(dets[+e.target.dataset.i]);
+                        else if (e.target.id === 'skipFace') done(null);
+                    };
+                });
+            }
+
+            function onPeopleChanged() {
+                refreshScanState();
+                if (state.matches && !state.scanning) recompute();
+            }
+
+            // ---------- Step 3: output folders ----------
+            $('addFolder').onclick = () => {
+                if (!state.people.length) {toast('Add at least one person in step 2 first.'); return;}
+                state.folders.push({id: 'f' + (++uid), name: `Folder ${state.folders.length + 1}`, members: [], mode: 'all', autoFor: null, renamed: true});
+                renderFolders(); foldersChanged();
+                setTimeout(() => {const el = document.querySelector(`[data-fname="${state.folders.at(-1).id}"]`); el && el.select();}, 0);
+            };
+            function renderFolders() {
+                $('folders').innerHTML = state.folders.map(f => {
+                    const many = f.members.length >= 2;
+                    return `<div class="folder">
+        <div class="top">
+          <input type="text" value="${esc(f.name)}" data-fname="${f.id}" aria-label="Folder name">
+          <button class="small" data-delfolder="${f.id}">Remove</button>
+        </div>
+        <div class="lbl">Who goes in this folder:</div>
+        <div class="who">${state.people.map(p => `<label><input type="checkbox" data-fmem="${f.id}" value="${p.id}" ${f.members.includes(p.id) ? 'checked' : ''}> ${esc(p.name)}</label>`).join('')}</div>
+        ${many ? `<div class="mode">
+          <label><input type="radio" name="mode-${f.id}" data-fmode="${f.id}" value="all" ${f.mode === 'all' ? 'checked' : ''}> Only photos with all of them together</label>
+          <label><input type="radio" name="mode-${f.id}" data-fmode="${f.id}" value="any" ${f.mode === 'any' ? 'checked' : ''}> Any photo with at least one of them</label>
+        </div>` : ''}
+        ${f.members.length ? '' : '<div class="warn">Tick at least one person.</div>'}
+      </div>`;
+                }).join('') || '<p class="muted">No folders yet. Add people in step 2 or click "+ Add a folder".</p>';
+            }
+            $('folders').addEventListener('input', e => {
+                const id = e.target.dataset.fname; if (!id) return;
+                const f = state.folders.find(x => x.id === id);
+                f.name = e.target.value.trim() || 'Unnamed'; f.renamed = true;
+                if (state.matches) renderTabs();
+            });
+            $('folders').addEventListener('change', e => {
+                const t = e.target;
+                if (t.dataset.fmem) {
+                    const f = state.folders.find(x => x.id === t.dataset.fmem);
+                    f.members = state.people.map(p => p.id).filter(pid => pid === t.value ? t.checked : f.members.includes(pid));
+                    renderFolders(); foldersChanged();
+                } else if (t.dataset.fmode) {
+                    state.folders.find(x => x.id === t.dataset.fmode).mode = t.value; foldersChanged();
+                }
+            });
+            $('folders').addEventListener('click', e => {
+                const id = e.target.dataset.delfolder; if (!id) return;
+                state.folders = state.folders.filter(f => f.id !== id); state.excluded.delete(id);
+                renderFolders(); foldersChanged();
+            });
+            function foldersChanged() {if (state.matches && !state.scanning) recompute();}
+
+            // ---------- Step 4: scan ----------
+            function remaining() {return state.files.filter(f => !state.scan.has(f.id) && !state.failed.has(f.id));}
+            function refreshScanState() {
+                const ready = state.files.length && state.people.some(p => p.refs.length);
+                ready ? unlock('step4') : lock('step4');
+                if (state.scanning) return;
+                const left = remaining().length, any = state.scan.size + state.failed.size > 0;
+                $('startScan').disabled = !left;
+                $('startScan').textContent = !left && any ? 'Scan complete' : any ? 'Continue scan' : 'Start scan';
+                if (any && left) $('scanInfo').textContent = `${left.toLocaleString()} photos still to scan.`;
+                else if (any) $('scanInfo').textContent = `Done. ${state.scan.size.toLocaleString()} photos scanned${state.failed.size ? `, ${state.failed.size} couldn't be read` : ''}.`;
+                const total = state.files.length;
+                $('scanBar').style.width = total ? ((state.scan.size + state.failed.size) / total * 100).toFixed(1) + '%' : '0';
+            }
+            $('startScan').onclick = async () => {
+                if (state.scanning) return;
+                state.scanning = true; state.stop = false;
+                $('startScan').disabled = true; $('stopScan').style.display = '';
+                $('addSource').disabled = true;
+                let wake = null; try {wake = await navigator.wakeLock?.request('screen');} catch (e) { }
+                const todo = remaining();
+                const total = state.files.length;
+                const t0 = performance.now(); let processedNow = 0;
+                for (const f of todo) {
+                    if (state.stop) break;
+                    const src = state.sources.find(s => s.id === f.sourceId);
+                    try {
+                        const file = await f.handle.getFile();
+                        const canvas = await loadCanvas(file);
+                        const dets = await detect(canvas);
+                        const thumb = await thumbBlobUrl(canvas);
+                        state.scan.set(f.id, {thumb, faces: dets.map(d => d.descriptor)});
+                    } catch (err) {console.warn('Skipped', f.path, err); state.failed.add(f.id);}
+                    processedNow++;
+                    const doneCount = state.scan.size + state.failed.size;
+                    const per = (performance.now() - t0) / 1000 / processedNow;
+                    const srcIdx = state.sources.indexOf(src) + 1;
+                    $('scanBar').style.width = (doneCount / total * 100).toFixed(1) + '%';
+                    $('scanInfo').textContent = `Folder ${srcIdx} of ${state.sources.length} (${src.name}). ${doneCount.toLocaleString()} of ${total.toLocaleString()} photos. About ${fmtTime(per * (todo.length - processedNow))} left.`;
+                    if (processedNow % 20 === 0) {renderSources(); await new Promise(r => setTimeout(r, 0));}
+                }
+                try {wake && wake.release();} catch (e) { }
+                state.scanning = false;
+                $('stopScan').style.display = 'none'; $('addSource').disabled = false;
+                renderSources(); refreshScanState();
+                if (remaining().length) $('scanInfo').textContent = `Stopped. ${remaining().length.toLocaleString()} photos still to scan. You can review what's done so far or continue.`;
+                recompute(); unlock('step5'); unlock('step6');
+                $('step5').scrollIntoView({behavior: 'smooth'});
+            };
+            $('stopScan').onclick = () => {state.stop = true;};
+
+            // ---------- Step 5: matching + review ----------
+            function threshold() {return 0.62 - (+$('strict').value) * 0.011;}
+            function recompute() {
+                const th = threshold();
+                const byPerson = new Map(state.people.map(p => [p.id, new Set()]));
+                const refs = [];
+                state.people.forEach(p => p.refs.forEach(r => refs.push([p.id, r.desc])));
+                if (refs.length) {
+                    for (const [fid, ph] of state.scan) {
+                        for (const face of ph.faces) {
+                            let best = null, bd = Infinity;
+                            for (const [pid, d] of refs) {const x = dist(face, d); if (x < bd) {bd = x; best = pid;} }
+                            if (best && bd <= th) byPerson.get(best).add(fid);
+                        }
+                    }
+                }
+                const res = new Map();
+                for (const f of state.folders) {
+                    const sets = f.members.map(id => byPerson.get(id) || new Set());
+                    let out;
+                    if (!sets.length) out = new Set();
+                    else if (f.mode === 'all' && sets.length > 1) out = new Set([...sets[0]].filter(x => sets.every(s => s.has(x))));
+                    else out = new Set(sets.flatMap(s => [...s]));
+                    res.set(f.id, out);
+                }
+                state.matches = res;
+                const keys = state.folders.map(f => f.id);
+                if (!keys.includes(state.activeTab)) state.activeTab = keys[0] || null;
+                renderTabs(); renderGrid();
+            }
+            const order = new Map();
+            function fileOrder(fid) {
+                if (order.size !== state.files.length) {order.clear(); state.files.forEach((f, i) => order.set(f.id, i));}
+                return order.get(fid) ?? 0;
+            }
+            const fileById = fid => state.files.find(f => f.id === fid);
+            function tabName(key) {return state.folders.find(x => x.id === key)?.name || '';}
+            function excl(key) {if (!state.excluded.has(key)) state.excluded.set(key, new Set()); return state.excluded.get(key);}
+            function selectedFor(key) {
+                const ex = excl(key);
+                return [...(state.matches?.get(key) || [])].filter(fid => !ex.has(fid) && state.scan.has(fid));
+            }
+            function renderTabs() {
+                if (!state.matches) return;
+                $('tabs').innerHTML = state.folders.map(f =>
+                    `<button data-tab="${f.id}" class="${f.id === state.activeTab ? 'active' : ''}">${esc(f.name)} (${selectedFor(f.id).length})</button>`).join('');
+            }
+            function renderGrid() {
+                const key = state.activeTab, grid = $('grid');
+                if (!key || !state.matches) {grid.innerHTML = ''; $('tabInfo').textContent = ''; return;}
+                order.clear();
+                const list = [...state.matches.get(key)].filter(fid => state.scan.has(fid)).sort((a, b) => fileOrder(a) - fileOrder(b));
+                const ex = excl(key);
+                grid.innerHTML = list.map(fid => {
+                    const s = state.scan.get(fid), off = ex.has(fid);
+                    return `<div class="thumb ${off ? 'off' : ''}" data-fid="${fid}" title="${esc(fileById(fid).path)}">
+        <img src="${s.thumb}" loading="lazy" alt=""><span class="mark">${off ? '' : '✓'}</span>
+        <button class="zoom" data-zoom="${fid}">View</button></div>`;
+                }).join('') || '<p class="muted">No photos found for this folder yet. Check who is ticked in step 3, try adding more reference photos, or make matching a bit looser.</p>';
+                const n = list.filter(fid => !ex.has(fid)).length;
+                $('tabInfo').textContent = `${n} of ${list.length} selected`;
+            }
+            $('tabs').onclick = e => {const k = e.target.dataset.tab; if (!k) return; state.activeTab = k; renderTabs(); renderGrid();};
+            $('strict').oninput = () => recompute();
+            $('grid').onclick = async e => {
+                const zoom = e.target.dataset.zoom;
+                if (zoom !== undefined) {
+                    e.stopPropagation();
+                    const f = fileById(+zoom);
+                    const url = URL.createObjectURL(await f.handle.getFile());
+                    $('modalBox').innerHTML = `<img class="big" src="${url}" alt=""><div class="row" style="justify-content:space-between"><span class="muted">${esc(f.path)}</span><button id="closeBig">Close</button></div>`;
+                    $('modal').classList.add('open');
+                    $('modalBox').onclick = ev => {if (ev.target.id === 'closeBig') {$('modal').classList.remove('open'); URL.revokeObjectURL(url);} };
+                    return;
+                }
+                const el = e.target.closest('.thumb'); if (!el) return;
+                const fid = +el.dataset.fid, ex = excl(state.activeTab);
+                ex.has(fid) ? ex.delete(fid) : ex.add(fid);
+                renderTabs(); renderGrid();
+            };
+            $('modal').onclick = e => {if (e.target.id === 'modal' && !$('modalBox').querySelector('.pick')) $('modal').classList.remove('open');};
+            $('allOn').onclick = () => {if (!state.activeTab) return; excl(state.activeTab).clear(); renderTabs(); renderGrid();};
+            $('allOff').onclick = () => {
+                if (!state.activeTab) return;
+                const ex = excl(state.activeTab);
+                (state.matches.get(state.activeTab) || []).forEach(fid => ex.add(fid));
+                renderTabs(); renderGrid();
+            };
+
+            // ---------- Step 6: save ----------
+            const safe = s => s.replace(/[\\/:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim().slice(0, 80) || 'Unnamed';
+            $('save').onclick = async () => {
+                const folders = state.folders.filter(f => selectedFor(f.id).length);
+                if (!folders.length) {toast('Nothing selected to save yet.'); return;}
+                let dest;
+                try {dest = await window.showDirectoryPicker({mode: 'readwrite'});} catch (e) {return;}
+                $('save').disabled = true;
+                const total = folders.reduce((n, f) => n + selectedFor(f.id).length, 0);
+                let done = 0, failed = 0;
+                try {
+                    const root = await dest.getDirectoryHandle('Sorted by person', {create: true});
+                    const usedFolderNames = new Set();
+                    for (const fo of folders) {
+                        let fname = safe(fo.name), n = 2;
+                        while (usedFolderNames.has(fname.toLowerCase())) fname = `${safe(fo.name)} (${n++})`;
+                        usedFolderNames.add(fname.toLowerCase());
+                        const folder = await root.getDirectoryHandle(fname, {create: true});
+                        const used = new Set();
+                        const ids = selectedFor(fo.id).sort((a, b) => fileOrder(a) - fileOrder(b));
+                        for (const fid of ids) {
+                            const f = fileById(fid);
+                            let name = f.name;
+                            if (used.has(name.toLowerCase())) name = safe(f.path.replace(/\//g, ' - '));
+                            used.add(name.toLowerCase());
+                            try {
+                                const file = await f.handle.getFile();
+                                const out = await folder.getFileHandle(name, {create: true});
+                                const w = await out.createWritable(); await w.write(file); await w.close();
+                            } catch (err) {console.warn(err); failed++;}
+                            done++;
+                            $('saveBar').style.width = (done / total * 100).toFixed(1) + '%';
+                            $('saveInfo').textContent = `Copying ${done.toLocaleString()} of ${total.toLocaleString()}...`;
+                        }
+                    }
+                    $('saveInfo').textContent = `All done! ${(done - failed).toLocaleString()} photos copied into ${folders.length} folder${folders.length > 1 ? 's' : ''} in "${dest.name}/Sorted by person"${failed ? `. ${failed} couldn't be copied.` : '.'}`;
+                    setStatus('Saved. You can close this tab, or change the selection and save again.', 'ok');
+                } catch (err) {
+                    console.error(err);
+                    $('saveInfo').textContent = 'Something went wrong while saving. Make sure the drive is connected and try again.';
+                }
+                $('save').disabled = false;
+            };
+
+            window.addEventListener('beforeunload', e => {if (state.scanning || state.scan.size) {e.preventDefault(); e.returnValue = '';} });
+            renderFolders();
+            init();
+        })();
+    </script>
+</body>
+
+</html>
